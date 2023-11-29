@@ -84,6 +84,8 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
     private Block source;
     private Material blockType;
     private boolean randomFlowering;
+    private int sneaksTapped;
+    private boolean sneakState;
     private List<Block> vine = new ArrayList<>();
     private HashMap<Block, TempBlock> vineTempBlocks = new HashMap<>();
     private double distanceTraveled;
@@ -123,8 +125,7 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
     public void click() {
         Location newTarget = GeneralMethods.getTargetedLocation(player, selectRange, false);
         if (target == null) { //Remove the source
-            new PlantRegrowth(this.player, this.source);
-            this.source.setType(Material.AIR, false);
+            TempBlock tb = new TempBlock(this.source, Material.AIR.createBlockData(), getConfig().getLong("Abilities.Water.Plantbending.RegrowTime"));
             bPlayer.addCooldown(this);
             this.location.add(this.location.clone().subtract(newTarget).getDirection().clone()); //Start 1 block ahead of the source. Hopefully prevent it ending early
             addBlock(this.source);
@@ -221,6 +222,17 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
             distanceTraveled += speed;
         }
 
+        if (player.isSneaking() && !sneakState) {
+            sneaksTapped++;
+        }
+
+        sneakState = player.isSneaking();
+
+        if (sneaksTapped >= 3) {
+            destroyAll();
+        }
+
+
         //Clear all the blocks that are expiring
         Iterator<Block> it = vine.iterator();
         while (it.hasNext()) {
@@ -292,6 +304,20 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
         return false;
     }
 
+    private void destroyAll() {
+        int i = 0;
+        for (TempBlock tb : vineTempBlocks.values()) {
+            tb.getBlock().getWorld().spawnParticle(Particle.BLOCK_CRACK, tb.getBlock().getLocation(), 16, 0.5, 0.5, 0.5, tb.getBlockData());
+
+            tb.revertBlock();
+
+            if (i++ % 3 == 0) playSound(tb.getBlock());
+        }
+
+        vineTempBlocks.clear();
+        remove();
+    }
+
     private void fallBlock(Block block) {
         if (vineTempBlocks.containsKey(block)) {
             TempBlock tb = vineTempBlocks.get(block);
@@ -361,6 +387,9 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
             case "MANGROVE_LEAVES": return Material.getMaterial("MANGROVE_LEAVES");
             case "MANGROVE_PROPAGULE":
             case "MANGROVE_ROOTS": return Material.getMaterial("MANGROVE_ROOTS");
+            case "CHERRY_LEAVES":
+            case "CHERRY_SAPLING":
+                return Material.getMaterial("CHERRY_LEAVES");
             default: return Material.OAK_LEAVES;
         }
     }
@@ -409,7 +438,7 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
         ConfigManager.defaultConfig.save();
 
         ConfigManager.languageConfig.get().addDefault("Abilities.Water.PlantWhip.Description", "Whip players with a vine stemming from your Plantbending! You can even trap them with the vine if you wish!");
-        ConfigManager.languageConfig.get().addDefault("Abilities.Water.PlantWhip.Instructions", "Tap sneak while looking at a plant, and click to fire it towards where you are looking. While it's traveling, you can tap sneak again to trap the target in a dome on hit. Shift clicking the dome releases it.");
+        ConfigManager.languageConfig.get().addDefault("Abilities.Water.PlantWhip.Instructions", "Tap sneak while looking at a plant, and click to fire it towards where you are looking. While it's travelling, you can tap sneak again to trap the target in a dome on hit. Shift clicking the dome releases it. Tapping shift 3 times will also remove the whip completely.");
         ConfigManager.languageConfig.get().addDefault("Abilities.Water.PlantWhip.DeathMessage", "{victim} was whipped to death by {attacker}'s {ability}");
         ConfigManager.languageConfig.save();
 
@@ -420,7 +449,9 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
     }
 
     @Override
-    public void stop() {}
+    public void stop() {
+        
+    }
 
     @Override
     public String getAuthor() {
