@@ -103,7 +103,7 @@ public class PlantWhipDome extends PlantAbility implements AddonAbility {
             //blocks.remove(block);
 
             //Play broken block particles at the block's location
-            block.getWorld().spawnParticle(Particle.BLOCK_CRACK, block.getLocation(), 16, 0.5, 0.5, 0.5, data);
+            block.getWorld().spawnParticle(Particle.BLOCK, block.getLocation(), 16, 0.5, 0.5, 0.5, data);
             //block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GRASS_BREAK, 0.5F, 1);
             if (!playedSound) {
                 PlantWhip.playSound(block);

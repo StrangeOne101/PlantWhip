@@ -210,7 +210,7 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
                 //Create a new block of the vine if the block location is new
                 if (!vine.contains(block)) {
                     addBlock(block);
-                    block.getWorld().spawnParticle(Particle.BLOCK_CRACK, block.getLocation(), 16, 0.6, 0.6, 0.6, blockType.createBlockData());
+                    block.getWorld().spawnParticle(Particle.BLOCK, block.getLocation(), 16, 0.6, 0.6, 0.6, blockType.createBlockData());
                     if (!playedSound) {
                         playSound(block);
                         playedSound = true;
@@ -296,7 +296,7 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
             //vine.remove(block);
 
             //Play broken block particles at the block's location
-            block.getWorld().spawnParticle(Particle.BLOCK_CRACK, block.getLocation(), 16, 0.5, 0.5, 0.5, data);
+            block.getWorld().spawnParticle(Particle.BLOCK, block.getLocation(), 16, 0.5, 0.5, 0.5, data);
             //block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GRASS_BREAK, 0.5F, 1);
             playSound(block);
             return true;
@@ -307,7 +307,7 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
     private void destroyAll() {
         int i = 0;
         for (TempBlock tb : vineTempBlocks.values()) {
-            tb.getBlock().getWorld().spawnParticle(Particle.BLOCK_CRACK, tb.getBlock().getLocation(), 16, 0.5, 0.5, 0.5, tb.getBlockData());
+            tb.getBlock().getWorld().spawnParticle(Particle.BLOCK, tb.getBlock().getLocation(), 16, 0.5, 0.5, 0.5, tb.getBlockData());
 
             tb.revertBlock();
 
@@ -326,7 +326,7 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
             vineTempBlocks.remove(block);
             vine.remove(block);
 
-            block.getWorld().spawnParticle(Particle.BLOCK_CRACK, block.getLocation(), 8, 0.5, 0.5, 0.5, block.getBlockData());
+            block.getWorld().spawnParticle(Particle.BLOCK, block.getLocation(), 8, 0.5, 0.5, 0.5, block.getBlockData());
             FallingBlock fallingblock = block.getWorld().spawnFallingBlock(block.getLocation(), data);
             fallingblock.setDropItem(false);
             fallingblock.setTicksLived(1);
@@ -388,8 +388,9 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
             case "MANGROVE_PROPAGULE":
             case "MANGROVE_ROOTS": return Material.getMaterial("MANGROVE_ROOTS");
             case "CHERRY_LEAVES":
-            case "CHERRY_SAPLING":
-                return Material.getMaterial("CHERRY_LEAVES");
+            case "CHERRY_SAPLING": return Material.getMaterial("CHERRY_LEAVES");
+            case "PALE_OAK_LEAVES":
+            case "PALE_OAK_SAPLING": return Material.getMaterial("PALE_OAK_LEAVES");
             default: return Material.OAK_LEAVES;
         }
     }
@@ -460,7 +461,7 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
 
     @Override
     public String getVersion() {
-        return "1.0";
+        return "1.2";
     }
 
     @Override
@@ -579,7 +580,7 @@ public class PlantWhip extends PlantAbility implements AddonAbility, Listener {
                 for (PlantWhipDome instance : domeInstances) {
                     for (Location loc : instance.getLocations()) {
                         if (loc.getBlock().getLocation().distance(target) < 2) {
-                            instance.getLocations().forEach(l -> l.getWorld().spawnParticle(Particle.BLOCK_CRACK, l, 8, 0.5, 0.5, 0.5, l.getBlock().getType().createBlockData()));
+                            instance.getLocations().forEach(l -> l.getWorld().spawnParticle(Particle.BLOCK, l, 8, 0.5, 0.5, 0.5, l.getBlock().getType().createBlockData()));
                             instance.remove();
                             playSound(instance.getLocation().getBlock()); //The center of it
                             return;
